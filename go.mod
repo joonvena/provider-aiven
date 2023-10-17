@@ -1,4 +1,4 @@
-module github.com/upbound/upjet-provider-template
+module github.com/joonvena/provider-aiven
 
 go 1.19
 

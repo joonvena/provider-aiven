@@ -9,15 +9,19 @@ import (
 
 	"github.com/upbound/upjet/pkg/controller"
 
-	resource "github.com/upbound/upjet-provider-template/internal/controller/null/resource"
-	providerconfig "github.com/upbound/upjet-provider-template/internal/controller/providerconfig"
+	database "github.com/joonvena/provider-aiven/internal/controller/postgres/database"
+	service "github.com/joonvena/provider-aiven/internal/controller/postgres/service"
+	user "github.com/joonvena/provider-aiven/internal/controller/postgres/user"
+	providerconfig "github.com/joonvena/provider-aiven/internal/controller/providerconfig"
 )
 
 // Setup creates all controllers with the supplied logger and adds them to
 // the supplied manager.
 func Setup(mgr ctrl.Manager, o controller.Options) error {
 	for _, setup := range []func(ctrl.Manager, controller.Options) error{
-		resource.Setup,
+		database.Setup,
+		service.Setup,
+		user.Setup,
 		providerconfig.Setup,
 	} {
 		if err := setup(mgr, o); err != nil {
