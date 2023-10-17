@@ -9,9 +9,12 @@ import (
 
 	"github.com/upbound/upjet/pkg/controller"
 
-	database "github.com/joonvena/provider-aiven/internal/controller/postgres/database"
-	service "github.com/joonvena/provider-aiven/internal/controller/postgres/service"
-	user "github.com/joonvena/provider-aiven/internal/controller/postgres/user"
+	database "github.com/joonvena/provider-aiven/internal/controller/mysql/database"
+	service "github.com/joonvena/provider-aiven/internal/controller/mysql/service"
+	user "github.com/joonvena/provider-aiven/internal/controller/mysql/user"
+	databasepostgres "github.com/joonvena/provider-aiven/internal/controller/postgres/database"
+	servicepostgres "github.com/joonvena/provider-aiven/internal/controller/postgres/service"
+	userpostgres "github.com/joonvena/provider-aiven/internal/controller/postgres/user"
 	providerconfig "github.com/joonvena/provider-aiven/internal/controller/providerconfig"
 )
 
@@ -22,6 +25,9 @@ func Setup(mgr ctrl.Manager, o controller.Options) error {
 		database.Setup,
 		service.Setup,
 		user.Setup,
+		databasepostgres.Setup,
+		servicepostgres.Setup,
+		userpostgres.Setup,
 		providerconfig.Setup,
 	} {
 		if err := setup(mgr, o); err != nil {

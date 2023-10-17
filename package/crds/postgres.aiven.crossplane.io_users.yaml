@@ -173,12 +173,8 @@ spec:
                             type: string
                         type: object
                     type: object
-                  username:
-                    description: The actual name of the PG User. To set up proper
-                      dependencies please refer to this variable as a reference. This
-                      property cannot be changed, doing so forces recreation of the
-                      resource.
-                    type: string
+                required:
+                - project
                 type: object
               managementPolicy:
                 default: FullControl
@@ -366,11 +362,6 @@ spec:
             required:
             - forProvider
             type: object
-            x-kubernetes-validations:
-            - message: project is a required parameter
-              rule: self.managementPolicy == 'ObserveOnly' || has(self.forProvider.project)
-            - message: username is a required parameter
-              rule: self.managementPolicy == 'ObserveOnly' || has(self.forProvider.username)
           status:
             description: UserStatus defines the observed state of User.
             properties:
@@ -396,12 +387,6 @@ spec:
                   type:
                     description: Type of the user account. Tells whether the user
                       is the primary account or a regular account.
-                    type: string
-                  username:
-                    description: The actual name of the PG User. To set up proper
-                      dependencies please refer to this variable as a reference. This
-                      property cannot be changed, doing so forces recreation of the
-                      resource.
                     type: string
                 type: object
               conditions:

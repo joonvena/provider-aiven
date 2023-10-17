@@ -5,9 +5,9 @@ metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.11.3
   creationTimestamp: null
-  name: databases.postgres.aiven.crossplane.io
+  name: databases.mysql.aiven.crossplane.io
 spec:
-  group: postgres.aiven.crossplane.io
+  group: mysql.aiven.crossplane.io
   names:
     categories:
     - crossplane
@@ -67,16 +67,6 @@ spec:
                 type: string
               forProvider:
                 properties:
-                  lcCollate:
-                    description: Default string sort order (`LC_COLLATE`) of the database.
-                      The default value is `en_US.UTF-8`. This property cannot be
-                      changed, doing so forces recreation of the resource.
-                    type: string
-                  lcCtype:
-                    description: Default character classification (`LC_CTYPE`) of
-                      the database. The default value is `en_US.UTF-8`. This property
-                      cannot be changed, doing so forces recreation of the resource.
-                    type: string
                   project:
                     description: Identifies the project this resource belongs to.
                       To set up proper dependencies please refer to this variable
@@ -361,16 +351,6 @@ spec:
               atProvider:
                 properties:
                   id:
-                    type: string
-                  lcCollate:
-                    description: Default string sort order (`LC_COLLATE`) of the database.
-                      The default value is `en_US.UTF-8`. This property cannot be
-                      changed, doing so forces recreation of the resource.
-                    type: string
-                  lcCtype:
-                    description: Default character classification (`LC_CTYPE`) of
-                      the database. The default value is `en_US.UTF-8`. This property
-                      cannot be changed, doing so forces recreation of the resource.
                     type: string
                   project:
                     description: Identifies the project this resource belongs to.

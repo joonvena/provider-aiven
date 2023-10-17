@@ -5,18 +5,18 @@ metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.11.3
   creationTimestamp: null
-  name: databases.postgres.aiven.crossplane.io
+  name: users.mysql.aiven.crossplane.io
 spec:
-  group: postgres.aiven.crossplane.io
+  group: mysql.aiven.crossplane.io
   names:
     categories:
     - crossplane
     - managed
     - aiven
-    kind: Database
-    listKind: DatabaseList
-    plural: databases
-    singular: database
+    kind: User
+    listKind: UserList
+    plural: users
+    singular: user
   scope: Cluster
   versions:
   - additionalPrinterColumns:
@@ -35,7 +35,7 @@ spec:
     name: v1alpha1
     schema:
       openAPIV3Schema:
-        description: Database is the Schema for the Databases API. <no value>
+        description: User is the Schema for the Users API. <no value>
         properties:
           apiVersion:
             description: 'APIVersion defines the versioned schema of this representation
@@ -50,7 +50,7 @@ spec:
           metadata:
             type: object
           spec:
-            description: DatabaseSpec defines the desired state of Database
+            description: UserSpec defines the desired state of User
             properties:
               deletionPolicy:
                 default: Delete
@@ -67,16 +67,28 @@ spec:
                 type: string
               forProvider:
                 properties:
-                  lcCollate:
-                    description: Default string sort order (`LC_COLLATE`) of the database.
-                      The default value is `en_US.UTF-8`. This property cannot be
-                      changed, doing so forces recreation of the resource.
+                  authentication:
+                    description: Authentication details. The possible values are `caching_sha2_password`
+                      and `mysql_native_password`.
                     type: string
-                  lcCtype:
-                    description: Default character classification (`LC_CTYPE`) of
-                      the database. The default value is `en_US.UTF-8`. This property
-                      cannot be changed, doing so forces recreation of the resource.
-                    type: string
+                  passwordSecretRef:
+                    description: The password of the MySQL User ( not applicable for
+                      all services ).
+                    properties:
+                      key:
+                        description: The key to select.
+                        type: string
+                      name:
+                        description: Name of the secret.
+                        type: string
+                      namespace:
+                        description: Namespace of the secret.
+                        type: string
+                    required:
+                    - key
+                    - name
+                    - namespace
+                    type: object
                   project:
                     description: Identifies the project this resource belongs to.
                       To set up proper dependencies please refer to this variable
@@ -162,10 +174,6 @@ spec:
                             type: string
                         type: object
                     type: object
-                  terminationProtection:
-                    description: It is recommended to enable this for any production
-                      databases containing critical data. The default value is `false`.
-                    type: boolean
                 required:
                 - project
                 type: object
@@ -356,21 +364,15 @@ spec:
             - forProvider
             type: object
           status:
-            description: DatabaseStatus defines the observed state of Database.
+            description: UserStatus defines the observed state of User.
             properties:
               atProvider:
                 properties:
+                  authentication:
+                    description: Authentication details. The possible values are `caching_sha2_password`
+                      and `mysql_native_password`.
+                    type: string
                   id:
-                    type: string
-                  lcCollate:
-                    description: Default string sort order (`LC_COLLATE`) of the database.
-                      The default value is `en_US.UTF-8`. This property cannot be
-                      changed, doing so forces recreation of the resource.
-                    type: string
-                  lcCtype:
-                    description: Default character classification (`LC_CTYPE`) of
-                      the database. The default value is `en_US.UTF-8`. This property
-                      cannot be changed, doing so forces recreation of the resource.
                     type: string
                   project:
                     description: Identifies the project this resource belongs to.
@@ -384,10 +386,10 @@ spec:
                       variable as a reference. This property cannot be changed, doing
                       so forces recreation of the resource.
                     type: string
-                  terminationProtection:
-                    description: It is recommended to enable this for any production
-                      databases containing critical data. The default value is `false`.
-                    type: boolean
+                  type:
+                    description: Type of the user account. Tells whether the user
+                      is the primary account or a regular account.
+                    type: string
                 type: object
               conditions:
                 description: Conditions of the resource.

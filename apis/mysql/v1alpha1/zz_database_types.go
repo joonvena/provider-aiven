@@ -13,11 +13,8 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
-type UserObservation struct {
+type DatabaseObservation struct {
 	ID *string `json:"id,omitempty" tf:"id,omitempty"`
-
-	// Defines whether replication is allowed.
-	PgAllowReplication *bool `json:"pgAllowReplication,omitempty" tf:"pg_allow_replication,omitempty"`
 
 	// Identifies the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
 	Project *string `json:"project,omitempty" tf:"project,omitempty"`
@@ -25,19 +22,11 @@ type UserObservation struct {
 	// Specifies the name of the service that this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
 	ServiceName *string `json:"serviceName,omitempty" tf:"service_name,omitempty"`
 
-	// Type of the user account. Tells whether the user is the primary account or a regular account.
-	Type *string `json:"type,omitempty" tf:"type,omitempty"`
+	// It is recommended to enable this for any production databases containing critical data. The default value is `false`.
+	TerminationProtection *bool `json:"terminationProtection,omitempty" tf:"termination_protection,omitempty"`
 }
 
-type UserParameters struct {
-
-	// The password of the PG User (not applicable for all services).
-	// +kubebuilder:validation:Optional
-	PasswordSecretRef *v1.SecretKeySelector `json:"passwordSecretRef,omitempty" tf:"-"`
-
-	// Defines whether replication is allowed.
-	// +kubebuilder:validation:Optional
-	PgAllowReplication *bool `json:"pgAllowReplication,omitempty" tf:"pg_allow_replication,omitempty"`
+type DatabaseParameters struct {
 
 	// Identifies the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
 	// +kubebuilder:validation:Required
@@ -55,53 +44,57 @@ type UserParameters struct {
 	// Selector for a Service to populate serviceName.
 	// +kubebuilder:validation:Optional
 	ServiceNameSelector *v1.Selector `json:"serviceNameSelector,omitempty" tf:"-"`
+
+	// It is recommended to enable this for any production databases containing critical data. The default value is `false`.
+	// +kubebuilder:validation:Optional
+	TerminationProtection *bool `json:"terminationProtection,omitempty" tf:"termination_protection,omitempty"`
 }
 
-// UserSpec defines the desired state of User
-type UserSpec struct {
+// DatabaseSpec defines the desired state of Database
+type DatabaseSpec struct {
 	v1.ResourceSpec `json:",inline"`
-	ForProvider     UserParameters `json:"forProvider"`
+	ForProvider     DatabaseParameters `json:"forProvider"`
 }
 
-// UserStatus defines the observed state of User.
-type UserStatus struct {
+// DatabaseStatus defines the observed state of Database.
+type DatabaseStatus struct {
 	v1.ResourceStatus `json:",inline"`
-	AtProvider        UserObservation `json:"atProvider,omitempty"`
+	AtProvider        DatabaseObservation `json:"atProvider,omitempty"`
 }
 
 // +kubebuilder:object:root=true
 
-// User is the Schema for the Users API. <no value>
+// Database is the Schema for the Databases API. <no value>
 // +kubebuilder:printcolumn:name="READY",type="string",JSONPath=".status.conditions[?(@.type=='Ready')].status"
 // +kubebuilder:printcolumn:name="SYNCED",type="string",JSONPath=".status.conditions[?(@.type=='Synced')].status"
 // +kubebuilder:printcolumn:name="EXTERNAL-NAME",type="string",JSONPath=".metadata.annotations.crossplane\\.io/external-name"
 // +kubebuilder:printcolumn:name="AGE",type="date",JSONPath=".metadata.creationTimestamp"
 // +kubebuilder:subresource:status
 // +kubebuilder:resource:scope=Cluster,categories={crossplane,managed,aiven}
-type User struct {
+type Database struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	Spec              UserSpec   `json:"spec"`
-	Status            UserStatus `json:"status,omitempty"`
+	Spec              DatabaseSpec   `json:"spec"`
+	Status            DatabaseStatus `json:"status,omitempty"`
 }
 
 // +kubebuilder:object:root=true
 
-// UserList contains a list of Users
-type UserList struct {
+// DatabaseList contains a list of Databases
+type DatabaseList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
-	Items           []User `json:"items"`
+	Items           []Database `json:"items"`
 }
 
 // Repository type metadata.
 var (
-	User_Kind             = "User"
-	User_GroupKind        = schema.GroupKind{Group: CRDGroup, Kind: User_Kind}.String()
-	User_KindAPIVersion   = User_Kind + "." + CRDGroupVersion.String()
-	User_GroupVersionKind = CRDGroupVersion.WithKind(User_Kind)
+	Database_Kind             = "Database"
+	Database_GroupKind        = schema.GroupKind{Group: CRDGroup, Kind: Database_Kind}.String()
+	Database_KindAPIVersion   = Database_Kind + "." + CRDGroupVersion.String()
+	Database_GroupVersionKind = CRDGroupVersion.WithKind(Database_Kind)
 )
 
 func init() {
-	SchemeBuilder.Register(&User{}, &UserList{})
+	SchemeBuilder.Register(&Database{}, &DatabaseList{})
 }

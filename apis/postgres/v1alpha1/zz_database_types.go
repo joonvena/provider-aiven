@@ -14,10 +14,6 @@ import (
 )
 
 type DatabaseObservation struct {
-
-	// The name of the service database. This property cannot be changed, doing so forces recreation of the resource.
-	DatabaseName *string `json:"databaseName,omitempty" tf:"database_name,omitempty"`
-
 	ID *string `json:"id,omitempty" tf:"id,omitempty"`
 
 	// Default string sort order (`LC_COLLATE`) of the database. The default value is `en_US.UTF-8`. This property cannot be changed, doing so forces recreation of the resource.
@@ -38,10 +34,6 @@ type DatabaseObservation struct {
 
 type DatabaseParameters struct {
 
-	// The name of the service database. This property cannot be changed, doing so forces recreation of the resource.
-	// +kubebuilder:validation:Optional
-	DatabaseName *string `json:"databaseName,omitempty" tf:"database_name,omitempty"`
-
 	// Default string sort order (`LC_COLLATE`) of the database. The default value is `en_US.UTF-8`. This property cannot be changed, doing so forces recreation of the resource.
 	// +kubebuilder:validation:Optional
 	LcCollate *string `json:"lcCollate,omitempty" tf:"lc_collate,omitempty"`
@@ -51,12 +43,11 @@ type DatabaseParameters struct {
 	LcCtype *string `json:"lcCtype,omitempty" tf:"lc_ctype,omitempty"`
 
 	// Identifies the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
-	// +kubebuilder:validation:Optional
-	Project *string `json:"project,omitempty" tf:"project,omitempty"`
+	// +kubebuilder:validation:Required
+	Project *string `json:"project" tf:"project,omitempty"`
 
 	// Specifies the name of the service that this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
 	// +crossplane:generate:reference:type=Service
-	// +crossplane:generate:reference:extractor=github.com/joonvena/provider-aiven/config.ServiceNameExtractor()
 	// +kubebuilder:validation:Optional
 	ServiceName *string `json:"serviceName,omitempty" tf:"service_name,omitempty"`
 
@@ -97,10 +88,8 @@ type DatabaseStatus struct {
 type Database struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="self.managementPolicy == 'ObserveOnly' || has(self.forProvider.databaseName)",message="databaseName is a required parameter"
-	// +kubebuilder:validation:XValidation:rule="self.managementPolicy == 'ObserveOnly' || has(self.forProvider.project)",message="project is a required parameter"
-	Spec   DatabaseSpec   `json:"spec"`
-	Status DatabaseStatus `json:"status,omitempty"`
+	Spec              DatabaseSpec   `json:"spec"`
+	Status            DatabaseStatus `json:"status,omitempty"`
 }
 
 // +kubebuilder:object:root=true

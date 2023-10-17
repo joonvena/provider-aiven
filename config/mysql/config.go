@@ -1,4 +1,4 @@
-package postgres
+package mysql
 
 import "github.com/upbound/upjet/pkg/config"
 
@@ -7,13 +7,13 @@ const (
 )
 
 func Configure(p *config.Provider) {
-	p.AddResourceConfigurator("aiven_pg_database", func(r *config.Resource) {
+	p.AddResourceConfigurator("aiven_mysql_database", func(r *config.Resource) {
 		r.References["service_name"] = config.Reference{
 			Type: "Service",
 		}
 	})
 
-	p.AddResourceConfigurator("aiven_pg_user", func(r *config.Resource) {
+	p.AddResourceConfigurator("aiven_mysql_user", func(r *config.Resource) {
 		r.References["service_name"] = config.Reference{
 			Type: "Service",
 		}

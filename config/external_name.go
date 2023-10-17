@@ -10,9 +10,13 @@ import "github.com/upbound/upjet/pkg/config"
 // provider.
 var ExternalNameConfigs = map[string]config.ExternalName{
 	// Import requires using a randomly generated ID from provider: nl-2e21sda
-	"aiven_pg":          config.IdentifierFromProvider,
-	"aiven_pg_database": config.IdentifierFromProvider,
-	"aiven_pg_user":     config.IdentifierFromProvider,
+	"aiven_pg":          config.TemplatedStringAsIdentifier("service_name", "{{ .parameters.project }}/{{ .external_name }}"),
+	"aiven_pg_database": config.TemplatedStringAsIdentifier("database_name", "{{ .parameters.project }}/{{ .parameters.service_name }}/{{ .external_name }}"),
+	"aiven_pg_user":     config.TemplatedStringAsIdentifier("username", "{{ .parameters.project }}/{{ .parameters.service_name }}/{{ .external_name }}"),
+
+	"aiven_mysql":          config.TemplatedStringAsIdentifier("service_name", "{{ .parameters.project }}/{{ .external_name }}"),
+	"aiven_mysql_database": config.TemplatedStringAsIdentifier("database_name", "{{ .parameters.project }}/{{ .parameters.service_name }}/{{ .external_name }}"),
+	"aiven_mysql_user":     config.TemplatedStringAsIdentifier("username", "{{ .parameters.project }}/{{ .parameters.service_name }}/{{ .external_name }}"),
 }
 
 // ExternalNameConfigurations applies all external name configs listed in the

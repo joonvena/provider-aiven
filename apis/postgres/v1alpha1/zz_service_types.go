@@ -932,9 +932,6 @@ type ServiceObservation struct {
 	// Service integrations to specify when creating a service. Not applied after initial service creation
 	ServiceIntegrations []ServiceIntegrationsObservation `json:"serviceIntegrations,omitempty" tf:"service_integrations,omitempty"`
 
-	// Specifies the actual name of the service. The name cannot be changed later without destroying and re-creating the service so name should be picked based on intended service usage rather than current attributes.
-	ServiceName *string `json:"serviceName,omitempty" tf:"service_name,omitempty"`
-
 	// The port of the service
 	ServicePort *float64 `json:"servicePort,omitempty" tf:"service_port,omitempty"`
 
@@ -992,8 +989,8 @@ type ServiceParameters struct {
 	Plan *string `json:"plan,omitempty" tf:"plan,omitempty"`
 
 	// Identifies the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
-	// +kubebuilder:validation:Optional
-	Project *string `json:"project,omitempty" tf:"project,omitempty"`
+	// +kubebuilder:validation:Required
+	Project *string `json:"project" tf:"project,omitempty"`
 
 	// Specifies the VPC the service should run in. If the value is not set the service is not run inside a VPC. When set, the value should be given as a reference to set up dependencies correctly and the VPC must be in the same cloud and region as the service itself. Project can be freely moved to and from VPC after creation but doing so triggers migration to new servers so the operation can take significant amount of time to complete if the service has a lot of data.
 	// +kubebuilder:validation:Optional
@@ -1002,10 +999,6 @@ type ServiceParameters struct {
 	// Service integrations to specify when creating a service. Not applied after initial service creation
 	// +kubebuilder:validation:Optional
 	ServiceIntegrations []ServiceIntegrationsParameters `json:"serviceIntegrations,omitempty" tf:"service_integrations,omitempty"`
-
-	// Specifies the actual name of the service. The name cannot be changed later without destroying and re-creating the service so name should be picked based on intended service usage rather than current attributes.
-	// +kubebuilder:validation:Optional
-	ServiceName *string `json:"serviceName,omitempty" tf:"service_name,omitempty"`
 
 	// Static IPs that are going to be associated with this service. Please assign a value using the 'toset' function. Once a static ip resource is in the 'assigned' state it cannot be unbound from the node again
 	// +kubebuilder:validation:Optional
@@ -1078,8 +1071,6 @@ type Service struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 	// +kubebuilder:validation:XValidation:rule="self.managementPolicy == 'ObserveOnly' || has(self.forProvider.plan)",message="plan is a required parameter"
-	// +kubebuilder:validation:XValidation:rule="self.managementPolicy == 'ObserveOnly' || has(self.forProvider.project)",message="project is a required parameter"
-	// +kubebuilder:validation:XValidation:rule="self.managementPolicy == 'ObserveOnly' || has(self.forProvider.serviceName)",message="serviceName is a required parameter"
 	Spec   ServiceSpec   `json:"spec"`
 	Status ServiceStatus `json:"status,omitempty"`
 }

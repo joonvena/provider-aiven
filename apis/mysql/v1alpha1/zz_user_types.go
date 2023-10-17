@@ -14,10 +14,11 @@ import (
 )
 
 type UserObservation struct {
-	ID *string `json:"id,omitempty" tf:"id,omitempty"`
 
-	// Defines whether replication is allowed.
-	PgAllowReplication *bool `json:"pgAllowReplication,omitempty" tf:"pg_allow_replication,omitempty"`
+	// Authentication details. The possible values are `caching_sha2_password` and `mysql_native_password`.
+	Authentication *string `json:"authentication,omitempty" tf:"authentication,omitempty"`
+
+	ID *string `json:"id,omitempty" tf:"id,omitempty"`
 
 	// Identifies the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
 	Project *string `json:"project,omitempty" tf:"project,omitempty"`
@@ -31,13 +32,13 @@ type UserObservation struct {
 
 type UserParameters struct {
 
-	// The password of the PG User (not applicable for all services).
+	// Authentication details. The possible values are `caching_sha2_password` and `mysql_native_password`.
+	// +kubebuilder:validation:Optional
+	Authentication *string `json:"authentication,omitempty" tf:"authentication,omitempty"`
+
+	// The password of the MySQL User ( not applicable for all services ).
 	// +kubebuilder:validation:Optional
 	PasswordSecretRef *v1.SecretKeySelector `json:"passwordSecretRef,omitempty" tf:"-"`
-
-	// Defines whether replication is allowed.
-	// +kubebuilder:validation:Optional
-	PgAllowReplication *bool `json:"pgAllowReplication,omitempty" tf:"pg_allow_replication,omitempty"`
 
 	// Identifies the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
 	// +kubebuilder:validation:Required

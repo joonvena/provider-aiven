@@ -733,12 +733,6 @@ spec:
                       - sourceServiceName
                       type: object
                     type: array
-                  serviceName:
-                    description: Specifies the actual name of the service. The name
-                      cannot be changed later without destroying and re-creating the
-                      service so name should be picked based on intended service usage
-                      rather than current attributes.
-                    type: string
                   staticIps:
                     description: Static IPs that are going to be associated with this
                       service. Please assign a value using the 'toset' function. Once
@@ -771,6 +765,8 @@ spec:
                       of the content can at least be restored from backup in case
                       accidental deletion is done.
                     type: boolean
+                required:
+                - project
                 type: object
               managementPolicy:
                 default: FullControl
@@ -961,10 +957,6 @@ spec:
             x-kubernetes-validations:
             - message: plan is a required parameter
               rule: self.managementPolicy == 'ObserveOnly' || has(self.forProvider.plan)
-            - message: project is a required parameter
-              rule: self.managementPolicy == 'ObserveOnly' || has(self.forProvider.project)
-            - message: serviceName is a required parameter
-              rule: self.managementPolicy == 'ObserveOnly' || has(self.forProvider.serviceName)
           status:
             description: ServiceStatus defines the observed state of Service.
             properties:
@@ -1636,12 +1628,6 @@ spec:
                           type: string
                       type: object
                     type: array
-                  serviceName:
-                    description: Specifies the actual name of the service. The name
-                      cannot be changed later without destroying and re-creating the
-                      service so name should be picked based on intended service usage
-                      rather than current attributes.
-                    type: string
                   servicePort:
                     description: The port of the service
                     type: number

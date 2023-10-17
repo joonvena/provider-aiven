@@ -1,0 +1,1285 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.11.3
+  creationTimestamp: null
+  name: services.mysql.aiven.crossplane.io
+spec:
+  group: mysql.aiven.crossplane.io
+  names:
+    categories:
+    - crossplane
+    - managed
+    - aiven
+    kind: Service
+    listKind: ServiceList
+    plural: services
+    singular: service
+  scope: Cluster
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .status.conditions[?(@.type=='Ready')].status
+      name: READY
+      type: string
+    - jsonPath: .status.conditions[?(@.type=='Synced')].status
+      name: SYNCED
+      type: string
+    - jsonPath: .metadata.annotations.crossplane\.io/external-name
+      name: EXTERNAL-NAME
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: AGE
+      type: date
+    name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        description: Service is the Schema for the Services API. <no value>
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: ServiceSpec defines the desired state of Service
+            properties:
+              deletionPolicy:
+                default: Delete
+                description: 'DeletionPolicy specifies what will happen to the underlying
+                  external when this managed resource is deleted - either "Delete"
+                  or "Orphan" the external resource. This field is planned to be deprecated
+                  in favor of the ManagementPolicy field in a future release. Currently,
+                  both could be set independently and non-default values would be
+                  honored if the feature flag is enabled. See the design doc for more
+                  information: https://github.com/crossplane/crossplane/blob/499895a25d1a1a0ba1604944ef98ac7a1a71f197/design/design-doc-observe-only-resources.md?plain=1#L223'
+                enum:
+                - Orphan
+                - Delete
+                type: string
+              forProvider:
+                properties:
+                  additionalDiskSpace:
+                    description: Additional disk space. Possible values depend on
+                      the service type, the cloud provider and the project. Therefore,
+                      reducing will result in the service rebalancing.
+                    type: string
+                  cloudName:
+                    description: Defines where the cloud provider and region where
+                      the service is hosted in. This can be changed freely after service
+                      is created. Changing the value will trigger a potentially lengthy
+                      migration process for the service. Format is cloud provider
+                      name (`aws`, `azure`, `do` `google`, `upcloud`, etc.), dash,
+                      and the cloud provider specific region name. These are documented
+                      on each Cloud provider's own support articles, like [here for
+                      Google](https://cloud.google.com/compute/docs/regions-zones/)
+                      and [here for AWS](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.RegionsAndAvailabilityZones.html).
+                    type: string
+                  diskSpace:
+                    description: Service disk space. Possible values depend on the
+                      service type, the cloud provider and the project. Therefore,
+                      reducing will result in the service rebalancing.
+                    type: string
+                  maintenanceWindowDow:
+                    description: Day of week when maintenance operations should be
+                      performed. One monday, tuesday, wednesday, etc.
+                    type: string
+                  maintenanceWindowTime:
+                    description: Time of day when maintenance operations should be
+                      performed. UTC time in HH:mm:ss format.
+                    type: string
+                  mysqlUserConfig:
+                    description: Mysql user configurable settings
+                    items:
+                      properties:
+                        additionalBackupRegions:
+                          description: Additional Cloud Regions for Backup Replication.
+                          items:
+                            type: string
+                          type: array
+                        adminPasswordSecretRef:
+                          description: Custom password for admin user. Defaults to
+                            random string. This must be set only when a new service
+                            is being created.
+                          properties:
+                            key:
+                              description: The key to select.
+                              type: string
+                            name:
+                              description: Name of the secret.
+                              type: string
+                            namespace:
+                              description: Namespace of the secret.
+                              type: string
+                          required:
+                          - key
+                          - name
+                          - namespace
+                          type: object
+                        adminUsername:
+                          description: Custom username for admin user. This must be
+                            set only when a new service is being created.
+                          type: string
+                        backupHour:
+                          description: The hour of day (in UTC) when backup for the
+                            service is started. New backup is only started if previous
+                            backup has already completed.
+                          type: number
+                        backupMinute:
+                          description: The minute of an hour when backup for the service
+                            is started. New backup is only started if previous backup
+                            has already completed.
+                          type: number
+                        binlogRetentionPeriod:
+                          description: The minimum amount of time in seconds to keep
+                            binlog entries before deletion. This may be extended for
+                            services that require binlog entries for longer than the
+                            default for example if using the MySQL Debezium Kafka
+                            connector.
+                          type: number
+                        ipFilter:
+                          description: Allow incoming connections from CIDR address
+                            block, e.g. '10.20.0.0/16'.
+                          items:
+                            type: string
+                          type: array
+                        ipFilterObject:
+                          description: Allow incoming connections from CIDR address
+                            block, e.g. '10.20.0.0/16'.
+                          items:
+                            properties:
+                              description:
+                                description: Description for IP filter list entry.
+                                type: string
+                              network:
+                                description: CIDR address block.
+                                type: string
+                            required:
+                            - network
+                            type: object
+                          type: array
+                        ipFilterString:
+                          description: Allow incoming connections from CIDR address
+                            block, e.g. '10.20.0.0/16'.
+                          items:
+                            type: string
+                          type: array
+                        migration:
+                          description: Migrate data from existing server.
+                          items:
+                            properties:
+                              dbname:
+                                description: Database name for bootstrapping the initial
+                                  connection.
+                                type: string
+                              host:
+                                description: Hostname or IP address of the server
+                                  where to migrate data from.
+                                type: string
+                              ignoreDbs:
+                                description: Comma-separated list of databases, which
+                                  should be ignored during migration (supported by
+                                  MySQL and PostgreSQL only at the moment).
+                                type: string
+                              method:
+                                description: The migration method to be used (currently
+                                  supported only by Redis, MySQL and PostgreSQL service
+                                  types).
+                                type: string
+                              passwordSecretRef:
+                                description: Password for authentication with the
+                                  server where to migrate data from.
+                                properties:
+                                  key:
+                                    description: The key to select.
+                                    type: string
+                                  name:
+                                    description: Name of the secret.
+                                    type: string
+                                  namespace:
+                                    description: Namespace of the secret.
+                                    type: string
+                                required:
+                                - key
+                                - name
+                                - namespace
+                                type: object
+                              port:
+                                description: Port number of the server where to migrate
+                                  data from.
+                                type: number
+                              ssl:
+                                description: The server where to migrate data from
+                                  is secured with SSL. The default value is `true`.
+                                type: boolean
+                              username:
+                                description: User name for authentication with the
+                                  server where to migrate data from.
+                                type: string
+                            required:
+                            - host
+                            - port
+                            type: object
+                          type: array
+                        mysql:
+                          description: mysql.conf configuration values.
+                          items:
+                            properties:
+                              connectTimeout:
+                                description: The number of seconds that the mysqld
+                                  server waits for a connect packet before responding
+                                  with Bad handshake.
+                                type: number
+                              defaultTimeZone:
+                                description: Default server time zone as an offset
+                                  from UTC (from -12:00 to +12:00), a time zone name,
+                                  or 'SYSTEM' to use the MySQL server default.
+                                type: string
+                              groupConcatMaxLen:
+                                description: The maximum permitted result length in
+                                  bytes for the GROUP_CONCAT() function.
+                                type: number
+                              informationSchemaStatsExpiry:
+                                description: The time, in seconds, before cached statistics
+                                  expire.
+                                type: number
+                              innodbChangeBufferMaxSize:
+                                description: Maximum size for the InnoDB change buffer,
+                                  as a percentage of the total size of the buffer
+                                  pool. Default is 25.
+                                type: number
+                              innodbFlushNeighbors:
+                                description: 'Specifies whether flushing a page from
+                                  the InnoDB buffer pool also flushes other dirty
+                                  pages in the same extent (default is 1): 0 - dirty
+                                  pages in the same extent are not flushed,  1 - flush
+                                  contiguous dirty pages in the same extent,  2 -
+                                  flush dirty pages in the same extent.'
+                                type: number
+                              innodbFtMinTokenSize:
+                                description: Minimum length of words that are stored
+                                  in an InnoDB FULLTEXT index. Changing this parameter
+                                  will lead to a restart of the MySQL service.
+                                type: number
+                              innodbFtServerStopwordTable:
+                                description: This option is used to specify your own
+                                  InnoDB FULLTEXT index stopword list for all InnoDB
+                                  tables.
+                                type: string
+                              innodbLockWaitTimeout:
+                                description: The length of time in seconds an InnoDB
+                                  transaction waits for a row lock before giving up.
+                                  Default is 120.
+                                type: number
+                              innodbLogBufferSize:
+                                description: The size in bytes of the buffer that
+                                  InnoDB uses to write to the log files on disk.
+                                type: number
+                              innodbOnlineAlterLogMaxSize:
+                                description: The upper limit in bytes on the size
+                                  of the temporary log files used during online DDL
+                                  operations for InnoDB tables.
+                                type: number
+                              innodbPrintAllDeadlocks:
+                                description: When enabled, information about all deadlocks
+                                  in InnoDB user transactions is recorded in the error
+                                  log. Disabled by default.
+                                type: boolean
+                              innodbReadIoThreads:
+                                description: The number of I/O threads for read operations
+                                  in InnoDB. Default is 4. Changing this parameter
+                                  will lead to a restart of the MySQL service.
+                                type: number
+                              innodbRollbackOnTimeout:
+                                description: When enabled a transaction timeout causes
+                                  InnoDB to abort and roll back the entire transaction.
+                                  Changing this parameter will lead to a restart of
+                                  the MySQL service.
+                                type: boolean
+                              innodbThreadConcurrency:
+                                description: Defines the maximum number of threads
+                                  permitted inside of InnoDB. Default is 0 (infinite
+                                  concurrency - no limit).
+                                type: number
+                              innodbWriteIoThreads:
+                                description: The number of I/O threads for write operations
+                                  in InnoDB. Default is 4. Changing this parameter
+                                  will lead to a restart of the MySQL service.
+                                type: number
+                              interactiveTimeout:
+                                description: The number of seconds the server waits
+                                  for activity on an interactive connection before
+                                  closing it.
+                                type: number
+                              internalTmpMemStorageEngine:
+                                description: The storage engine for in-memory internal
+                                  temporary tables.
+                                type: string
+                              longQueryTime:
+                                description: The slow_query_logs work as SQL statements
+                                  that take more than long_query_time seconds to execute.
+                                  Default is 10s.
+                                type: number
+                              maxAllowedPacket:
+                                description: Size of the largest message in bytes
+                                  that can be received by the server. Default is 67108864
+                                  (64M).
+                                type: number
+                              maxHeapTableSize:
+                                description: Limits the size of internal in-memory
+                                  tables. Also set tmp_table_size. Default is 16777216
+                                  (16M).
+                                type: number
+                              netBufferLength:
+                                description: Start sizes of connection buffer and
+                                  result buffer. Default is 16384 (16K). Changing
+                                  this parameter will lead to a restart of the MySQL
+                                  service.
+                                type: number
+                              netReadTimeout:
+                                description: The number of seconds to wait for more
+                                  data from a connection before aborting the read.
+                                type: number
+                              netWriteTimeout:
+                                description: The number of seconds to wait for a block
+                                  to be written to a connection before aborting the
+                                  write.
+                                type: number
+                              slowQueryLog:
+                                description: Slow query log enables capturing of slow
+                                  queries. Setting slow_query_log to false also truncates
+                                  the mysql.slow_log table. Default is off.
+                                type: boolean
+                              sortBufferSize:
+                                description: Sort buffer size in bytes for ORDER BY
+                                  optimization. Default is 262144 (256K).
+                                type: number
+                              sqlMode:
+                                description: Global SQL mode. Set to empty to use
+                                  MySQL server defaults. When creating a new service
+                                  and not setting this field Aiven default SQL mode
+                                  (strict, SQL standard compliant) will be assigned.
+                                type: string
+                              sqlRequirePrimaryKey:
+                                description: Require primary key to be defined for
+                                  new tables or old tables modified with ALTER TABLE
+                                  and fail if missing. It is recommended to always
+                                  have primary keys because various functionality
+                                  may break if any large table is missing them.
+                                type: boolean
+                              tmpTableSize:
+                                description: Limits the size of internal in-memory
+                                  tables. Also set max_heap_table_size. Default is
+                                  16777216 (16M).
+                                type: number
+                              waitTimeout:
+                                description: The number of seconds the server waits
+                                  for activity on a noninteractive connection before
+                                  closing it.
+                                type: number
+                            type: object
+                          type: array
+                        mysqlVersion:
+                          description: MySQL major version.
+                          type: string
+                        privateAccess:
+                          description: Allow access to selected service ports from
+                            private networks.
+                          items:
+                            properties:
+                              mysql:
+                                description: Allow clients to connect to mysql with
+                                  a DNS name that always resolves to the service's
+                                  private IP addresses. Only available in certain
+                                  network locations.
+                                type: boolean
+                              mysqlx:
+                                description: Allow clients to connect to mysqlx with
+                                  a DNS name that always resolves to the service's
+                                  private IP addresses. Only available in certain
+                                  network locations.
+                                type: boolean
+                              prometheus:
+                                description: Allow clients to connect to prometheus
+                                  with a DNS name that always resolves to the service's
+                                  private IP addresses. Only available in certain
+                                  network locations.
+                                type: boolean
+                            type: object
+                          type: array
+                        privatelinkAccess:
+                          description: Allow access to selected service components
+                            through Privatelink.
+                          items:
+                            properties:
+                              mysql:
+                                description: Enable mysql.
+                                type: boolean
+                              mysqlx:
+                                description: Enable mysqlx.
+                                type: boolean
+                              prometheus:
+                                description: Enable prometheus.
+                                type: boolean
+                            type: object
+                          type: array
+                        projectToForkFrom:
+                          description: Name of another project to fork a service from.
+                            This has effect only when a new service is being created.
+                          type: string
+                        publicAccess:
+                          description: Allow access to selected service ports from
+                            the public Internet.
+                          items:
+                            properties:
+                              mysql:
+                                description: Allow clients to connect to mysql from
+                                  the public internet for service nodes that are in
+                                  a project VPC or another type of private network.
+                                type: boolean
+                              mysqlx:
+                                description: Allow clients to connect to mysqlx from
+                                  the public internet for service nodes that are in
+                                  a project VPC or another type of private network.
+                                type: boolean
+                              prometheus:
+                                description: Allow clients to connect to prometheus
+                                  from the public internet for service nodes that
+                                  are in a project VPC or another type of private
+                                  network.
+                                type: boolean
+                            type: object
+                          type: array
+                        recoveryTargetTime:
+                          description: Recovery target time when forking a service.
+                            This has effect only when a new service is being created.
+                          type: string
+                        serviceToForkFrom:
+                          description: Name of another service to fork from. This
+                            has effect only when a new service is being created.
+                          type: string
+                        staticIps:
+                          description: Use static public IP addresses.
+                          type: boolean
+                      type: object
+                    type: array
+                  plan:
+                    description: Defines what kind of computing resources are allocated
+                      for the service. It can be changed after creation, though there
+                      are some restrictions when going to a smaller plan such as the
+                      new plan must have sufficient amount of disk space to store
+                      all current data and switching to a plan with fewer nodes might
+                      not be supported. The basic plan names are `hobbyist`, `startup-x`,
+                      `business-x` and `premium-x` where `x` is (roughly) the amount
+                      of memory on each node (also other attributes like number of
+                      CPUs and amount of disk space varies but naming is based on
+                      memory). The available options can be seem from the [Aiven pricing
+                      page](https://aiven.io/pricing).
+                    type: string
+                  project:
+                    description: Identifies the project this resource belongs to.
+                      To set up proper dependencies please refer to this variable
+                      as a reference. This property cannot be changed, doing so forces
+                      recreation of the resource.
+                    type: string
+                  projectVpcId:
+                    description: Specifies the VPC the service should run in. If the
+                      value is not set the service is not run inside a VPC. When set,
+                      the value should be given as a reference to set up dependencies
+                      correctly and the VPC must be in the same cloud and region as
+                      the service itself. Project can be freely moved to and from
+                      VPC after creation but doing so triggers migration to new servers
+                      so the operation can take significant amount of time to complete
+                      if the service has a lot of data.
+                    type: string
+                  serviceIntegrations:
+                    description: Service integrations to specify when creating a service.
+                      Not applied after initial service creation
+                    items:
+                      properties:
+                        integrationType:
+                          description: Type of the service integration. The only supported
+                            value at the moment is `read_replica`
+                          type: string
+                        sourceServiceName:
+                          description: Name of the source service
+                          type: string
+                      required:
+                      - integrationType
+                      - sourceServiceName
+                      type: object
+                    type: array
+                  staticIps:
+                    description: Static IPs that are going to be associated with this
+                      service. Please assign a value using the 'toset' function. Once
+                      a static ip resource is in the 'assigned' state it cannot be
+                      unbound from the node again
+                    items:
+                      type: string
+                    type: array
+                  tag:
+                    description: Tags are key-value pairs that allow you to categorize
+                      services.
+                    items:
+                      properties:
+                        key:
+                          description: Service tag key
+                          type: string
+                        value:
+                          description: Service tag value
+                          type: string
+                      required:
+                      - key
+                      - value
+                      type: object
+                    type: array
+                  terminationProtection:
+                    description: Prevents the service from being deleted. It is recommended
+                      to set this to `true` for all production services to prevent
+                      unintentional service deletion. This does not shield against
+                      deleting databases or topics but for services with backups much
+                      of the content can at least be restored from backup in case
+                      accidental deletion is done.
+                    type: boolean
+                required:
+                - project
+                type: object
+              managementPolicy:
+                default: FullControl
+                description: 'THIS IS AN ALPHA FIELD. Do not use it in production.
+                  It is not honored unless the relevant Crossplane feature flag is
+                  enabled, and may be changed or removed without notice. ManagementPolicy
+                  specifies the level of control Crossplane has over the managed external
+                  resource. This field is planned to replace the DeletionPolicy field
+                  in a future release. Currently, both could be set independently
+                  and non-default values would be honored if the feature flag is enabled.
+                  See the design doc for more information: https://github.com/crossplane/crossplane/blob/499895a25d1a1a0ba1604944ef98ac7a1a71f197/design/design-doc-observe-only-resources.md?plain=1#L223'
+                enum:
+                - FullControl
+                - ObserveOnly
+                - OrphanOnDelete
+                type: string
+              providerConfigRef:
+                default:
+                  name: default
+                description: ProviderConfigReference specifies how the provider that
+                  will be used to create, observe, update, and delete this managed
+                  resource should be configured.
+                properties:
+                  name:
+                    description: Name of the referenced object.
+                    type: string
+                  policy:
+                    description: Policies for referencing.
+                    properties:
+                      resolution:
+                        default: Required
+                        description: Resolution specifies whether resolution of this
+                          reference is required. The default is 'Required', which
+                          means the reconcile will fail if the reference cannot be
+                          resolved. 'Optional' means this reference will be a no-op
+                          if it cannot be resolved.
+                        enum:
+                        - Required
+                        - Optional
+                        type: string
+                      resolve:
+                        description: Resolve specifies when this reference should
+                          be resolved. The default is 'IfNotPresent', which will attempt
+                          to resolve the reference only when the corresponding field
+                          is not present. Use 'Always' to resolve the reference on
+                          every reconcile.
+                        enum:
+                        - Always
+                        - IfNotPresent
+                        type: string
+                    type: object
+                required:
+                - name
+                type: object
+              providerRef:
+                description: 'ProviderReference specifies the provider that will be
+                  used to create, observe, update, and delete this managed resource.
+                  Deprecated: Please use ProviderConfigReference, i.e. `providerConfigRef`'
+                properties:
+                  name:
+                    description: Name of the referenced object.
+                    type: string
+                  policy:
+                    description: Policies for referencing.
+                    properties:
+                      resolution:
+                        default: Required
+                        description: Resolution specifies whether resolution of this
+                          reference is required. The default is 'Required', which
+                          means the reconcile will fail if the reference cannot be
+                          resolved. 'Optional' means this reference will be a no-op
+                          if it cannot be resolved.
+                        enum:
+                        - Required
+                        - Optional
+                        type: string
+                      resolve:
+                        description: Resolve specifies when this reference should
+                          be resolved. The default is 'IfNotPresent', which will attempt
+                          to resolve the reference only when the corresponding field
+                          is not present. Use 'Always' to resolve the reference on
+                          every reconcile.
+                        enum:
+                        - Always
+                        - IfNotPresent
+                        type: string
+                    type: object
+                required:
+                - name
+                type: object
+              publishConnectionDetailsTo:
+                description: PublishConnectionDetailsTo specifies the connection secret
+                  config which contains a name, metadata and a reference to secret
+                  store config to which any connection details for this managed resource
+                  should be written. Connection details frequently include the endpoint,
+                  username, and password required to connect to the managed resource.
+                properties:
+                  configRef:
+                    default:
+                      name: default
+                    description: SecretStoreConfigRef specifies which secret store
+                      config should be used for this ConnectionSecret.
+                    properties:
+                      name:
+                        description: Name of the referenced object.
+                        type: string
+                      policy:
+                        description: Policies for referencing.
+                        properties:
+                          resolution:
+                            default: Required
+                            description: Resolution specifies whether resolution of
+                              this reference is required. The default is 'Required',
+                              which means the reconcile will fail if the reference
+                              cannot be resolved. 'Optional' means this reference
+                              will be a no-op if it cannot be resolved.
+                            enum:
+                            - Required
+                            - Optional
+                            type: string
+                          resolve:
+                            description: Resolve specifies when this reference should
+                              be resolved. The default is 'IfNotPresent', which will
+                              attempt to resolve the reference only when the corresponding
+                              field is not present. Use 'Always' to resolve the reference
+                              on every reconcile.
+                            enum:
+                            - Always
+                            - IfNotPresent
+                            type: string
+                        type: object
+                    required:
+                    - name
+                    type: object
+                  metadata:
+                    description: Metadata is the metadata for connection secret.
+                    properties:
+                      annotations:
+                        additionalProperties:
+                          type: string
+                        description: Annotations are the annotations to be added to
+                          connection secret. - For Kubernetes secrets, this will be
+                          used as "metadata.annotations". - It is up to Secret Store
+                          implementation for others store types.
+                        type: object
+                      labels:
+                        additionalProperties:
+                          type: string
+                        description: Labels are the labels/tags to be added to connection
+                          secret. - For Kubernetes secrets, this will be used as "metadata.labels".
+                          - It is up to Secret Store implementation for others store
+                          types.
+                        type: object
+                      type:
+                        description: Type is the SecretType for the connection secret.
+                          - Only valid for Kubernetes Secret Stores.
+                        type: string
+                    type: object
+                  name:
+                    description: Name is the name of the connection secret.
+                    type: string
+                required:
+                - name
+                type: object
+              writeConnectionSecretToRef:
+                description: WriteConnectionSecretToReference specifies the namespace
+                  and name of a Secret to which any connection details for this managed
+                  resource should be written. Connection details frequently include
+                  the endpoint, username, and password required to connect to the
+                  managed resource. This field is planned to be replaced in a future
+                  release in favor of PublishConnectionDetailsTo. Currently, both
+                  could be set independently and connection details would be published
+                  to both without affecting each other.
+                properties:
+                  name:
+                    description: Name of the secret.
+                    type: string
+                  namespace:
+                    description: Namespace of the secret.
+                    type: string
+                required:
+                - name
+                - namespace
+                type: object
+            required:
+            - forProvider
+            type: object
+            x-kubernetes-validations:
+            - message: plan is a required parameter
+              rule: self.managementPolicy == 'ObserveOnly' || has(self.forProvider.plan)
+          status:
+            description: ServiceStatus defines the observed state of Service.
+            properties:
+              atProvider:
+                properties:
+                  additionalDiskSpace:
+                    description: Additional disk space. Possible values depend on
+                      the service type, the cloud provider and the project. Therefore,
+                      reducing will result in the service rebalancing.
+                    type: string
+                  cloudName:
+                    description: Defines where the cloud provider and region where
+                      the service is hosted in. This can be changed freely after service
+                      is created. Changing the value will trigger a potentially lengthy
+                      migration process for the service. Format is cloud provider
+                      name (`aws`, `azure`, `do` `google`, `upcloud`, etc.), dash,
+                      and the cloud provider specific region name. These are documented
+                      on each Cloud provider's own support articles, like [here for
+                      Google](https://cloud.google.com/compute/docs/regions-zones/)
+                      and [here for AWS](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.RegionsAndAvailabilityZones.html).
+                    type: string
+                  components:
+                    description: Service component information objects
+                    items:
+                      properties:
+                        component:
+                          type: string
+                        host:
+                          type: string
+                        kafkaAuthenticationMethod:
+                          type: string
+                        port:
+                          type: number
+                        route:
+                          type: string
+                        ssl:
+                          type: boolean
+                        usage:
+                          type: string
+                      type: object
+                    type: array
+                  diskSpace:
+                    description: Service disk space. Possible values depend on the
+                      service type, the cloud provider and the project. Therefore,
+                      reducing will result in the service rebalancing.
+                    type: string
+                  diskSpaceCap:
+                    description: The maximum disk space of the service, possible values
+                      depend on the service type, the cloud provider and the project.
+                    type: string
+                  diskSpaceDefault:
+                    description: The default disk space of the service, possible values
+                      depend on the service type, the cloud provider and the project.
+                      Its also the minimum value for `disk_space`
+                    type: string
+                  diskSpaceStep:
+                    description: The default disk space step of the service, possible
+                      values depend on the service type, the cloud provider and the
+                      project. `disk_space` needs to increment from `disk_space_default`
+                      by increments of this size.
+                    type: string
+                  diskSpaceUsed:
+                    description: Disk space that service is currently using
+                    type: string
+                  id:
+                    type: string
+                  maintenanceWindowDow:
+                    description: Day of week when maintenance operations should be
+                      performed. One monday, tuesday, wednesday, etc.
+                    type: string
+                  maintenanceWindowTime:
+                    description: Time of day when maintenance operations should be
+                      performed. UTC time in HH:mm:ss format.
+                    type: string
+                  mysql:
+                    description: MySQL specific server provided values
+                    items:
+                      type: object
+                    type: array
+                  mysqlUserConfig:
+                    description: Mysql user configurable settings
+                    items:
+                      properties:
+                        additionalBackupRegions:
+                          description: Additional Cloud Regions for Backup Replication.
+                          items:
+                            type: string
+                          type: array
+                        adminUsername:
+                          description: Custom username for admin user. This must be
+                            set only when a new service is being created.
+                          type: string
+                        backupHour:
+                          description: The hour of day (in UTC) when backup for the
+                            service is started. New backup is only started if previous
+                            backup has already completed.
+                          type: number
+                        backupMinute:
+                          description: The minute of an hour when backup for the service
+                            is started. New backup is only started if previous backup
+                            has already completed.
+                          type: number
+                        binlogRetentionPeriod:
+                          description: The minimum amount of time in seconds to keep
+                            binlog entries before deletion. This may be extended for
+                            services that require binlog entries for longer than the
+                            default for example if using the MySQL Debezium Kafka
+                            connector.
+                          type: number
+                        ipFilter:
+                          description: Allow incoming connections from CIDR address
+                            block, e.g. '10.20.0.0/16'.
+                          items:
+                            type: string
+                          type: array
+                        ipFilterObject:
+                          description: Allow incoming connections from CIDR address
+                            block, e.g. '10.20.0.0/16'.
+                          items:
+                            properties:
+                              description:
+                                description: Description for IP filter list entry.
+                                type: string
+                              network:
+                                description: CIDR address block.
+                                type: string
+                            type: object
+                          type: array
+                        ipFilterString:
+                          description: Allow incoming connections from CIDR address
+                            block, e.g. '10.20.0.0/16'.
+                          items:
+                            type: string
+                          type: array
+                        migration:
+                          description: Migrate data from existing server.
+                          items:
+                            properties:
+                              dbname:
+                                description: Database name for bootstrapping the initial
+                                  connection.
+                                type: string
+                              host:
+                                description: Hostname or IP address of the server
+                                  where to migrate data from.
+                                type: string
+                              ignoreDbs:
+                                description: Comma-separated list of databases, which
+                                  should be ignored during migration (supported by
+                                  MySQL and PostgreSQL only at the moment).
+                                type: string
+                              method:
+                                description: The migration method to be used (currently
+                                  supported only by Redis, MySQL and PostgreSQL service
+                                  types).
+                                type: string
+                              port:
+                                description: Port number of the server where to migrate
+                                  data from.
+                                type: number
+                              ssl:
+                                description: The server where to migrate data from
+                                  is secured with SSL. The default value is `true`.
+                                type: boolean
+                              username:
+                                description: User name for authentication with the
+                                  server where to migrate data from.
+                                type: string
+                            type: object
+                          type: array
+                        mysql:
+                          description: mysql.conf configuration values.
+                          items:
+                            properties:
+                              connectTimeout:
+                                description: The number of seconds that the mysqld
+                                  server waits for a connect packet before responding
+                                  with Bad handshake.
+                                type: number
+                              defaultTimeZone:
+                                description: Default server time zone as an offset
+                                  from UTC (from -12:00 to +12:00), a time zone name,
+                                  or 'SYSTEM' to use the MySQL server default.
+                                type: string
+                              groupConcatMaxLen:
+                                description: The maximum permitted result length in
+                                  bytes for the GROUP_CONCAT() function.
+                                type: number
+                              informationSchemaStatsExpiry:
+                                description: The time, in seconds, before cached statistics
+                                  expire.
+                                type: number
+                              innodbChangeBufferMaxSize:
+                                description: Maximum size for the InnoDB change buffer,
+                                  as a percentage of the total size of the buffer
+                                  pool. Default is 25.
+                                type: number
+                              innodbFlushNeighbors:
+                                description: 'Specifies whether flushing a page from
+                                  the InnoDB buffer pool also flushes other dirty
+                                  pages in the same extent (default is 1): 0 - dirty
+                                  pages in the same extent are not flushed,  1 - flush
+                                  contiguous dirty pages in the same extent,  2 -
+                                  flush dirty pages in the same extent.'
+                                type: number
+                              innodbFtMinTokenSize:
+                                description: Minimum length of words that are stored
+                                  in an InnoDB FULLTEXT index. Changing this parameter
+                                  will lead to a restart of the MySQL service.
+                                type: number
+                              innodbFtServerStopwordTable:
+                                description: This option is used to specify your own
+                                  InnoDB FULLTEXT index stopword list for all InnoDB
+                                  tables.
+                                type: string
+                              innodbLockWaitTimeout:
+                                description: The length of time in seconds an InnoDB
+                                  transaction waits for a row lock before giving up.
+                                  Default is 120.
+                                type: number
+                              innodbLogBufferSize:
+                                description: The size in bytes of the buffer that
+                                  InnoDB uses to write to the log files on disk.
+                                type: number
+                              innodbOnlineAlterLogMaxSize:
+                                description: The upper limit in bytes on the size
+                                  of the temporary log files used during online DDL
+                                  operations for InnoDB tables.
+                                type: number
+                              innodbPrintAllDeadlocks:
+                                description: When enabled, information about all deadlocks
+                                  in InnoDB user transactions is recorded in the error
+                                  log. Disabled by default.
+                                type: boolean
+                              innodbReadIoThreads:
+                                description: The number of I/O threads for read operations
+                                  in InnoDB. Default is 4. Changing this parameter
+                                  will lead to a restart of the MySQL service.
+                                type: number
+                              innodbRollbackOnTimeout:
+                                description: When enabled a transaction timeout causes
+                                  InnoDB to abort and roll back the entire transaction.
+                                  Changing this parameter will lead to a restart of
+                                  the MySQL service.
+                                type: boolean
+                              innodbThreadConcurrency:
+                                description: Defines the maximum number of threads
+                                  permitted inside of InnoDB. Default is 0 (infinite
+                                  concurrency - no limit).
+                                type: number
+                              innodbWriteIoThreads:
+                                description: The number of I/O threads for write operations
+                                  in InnoDB. Default is 4. Changing this parameter
+                                  will lead to a restart of the MySQL service.
+                                type: number
+                              interactiveTimeout:
+                                description: The number of seconds the server waits
+                                  for activity on an interactive connection before
+                                  closing it.
+                                type: number
+                              internalTmpMemStorageEngine:
+                                description: The storage engine for in-memory internal
+                                  temporary tables.
+                                type: string
+                              longQueryTime:
+                                description: The slow_query_logs work as SQL statements
+                                  that take more than long_query_time seconds to execute.
+                                  Default is 10s.
+                                type: number
+                              maxAllowedPacket:
+                                description: Size of the largest message in bytes
+                                  that can be received by the server. Default is 67108864
+                                  (64M).
+                                type: number
+                              maxHeapTableSize:
+                                description: Limits the size of internal in-memory
+                                  tables. Also set tmp_table_size. Default is 16777216
+                                  (16M).
+                                type: number
+                              netBufferLength:
+                                description: Start sizes of connection buffer and
+                                  result buffer. Default is 16384 (16K). Changing
+                                  this parameter will lead to a restart of the MySQL
+                                  service.
+                                type: number
+                              netReadTimeout:
+                                description: The number of seconds to wait for more
+                                  data from a connection before aborting the read.
+                                type: number
+                              netWriteTimeout:
+                                description: The number of seconds to wait for a block
+                                  to be written to a connection before aborting the
+                                  write.
+                                type: number
+                              slowQueryLog:
+                                description: Slow query log enables capturing of slow
+                                  queries. Setting slow_query_log to false also truncates
+                                  the mysql.slow_log table. Default is off.
+                                type: boolean
+                              sortBufferSize:
+                                description: Sort buffer size in bytes for ORDER BY
+                                  optimization. Default is 262144 (256K).
+                                type: number
+                              sqlMode:
+                                description: Global SQL mode. Set to empty to use
+                                  MySQL server defaults. When creating a new service
+                                  and not setting this field Aiven default SQL mode
+                                  (strict, SQL standard compliant) will be assigned.
+                                type: string
+                              sqlRequirePrimaryKey:
+                                description: Require primary key to be defined for
+                                  new tables or old tables modified with ALTER TABLE
+                                  and fail if missing. It is recommended to always
+                                  have primary keys because various functionality
+                                  may break if any large table is missing them.
+                                type: boolean
+                              tmpTableSize:
+                                description: Limits the size of internal in-memory
+                                  tables. Also set max_heap_table_size. Default is
+                                  16777216 (16M).
+                                type: number
+                              waitTimeout:
+                                description: The number of seconds the server waits
+                                  for activity on a noninteractive connection before
+                                  closing it.
+                                type: number
+                            type: object
+                          type: array
+                        mysqlVersion:
+                          description: MySQL major version.
+                          type: string
+                        privateAccess:
+                          description: Allow access to selected service ports from
+                            private networks.
+                          items:
+                            properties:
+                              mysql:
+                                description: Allow clients to connect to mysql with
+                                  a DNS name that always resolves to the service's
+                                  private IP addresses. Only available in certain
+                                  network locations.
+                                type: boolean
+                              mysqlx:
+                                description: Allow clients to connect to mysqlx with
+                                  a DNS name that always resolves to the service's
+                                  private IP addresses. Only available in certain
+                                  network locations.
+                                type: boolean
+                              prometheus:
+                                description: Allow clients to connect to prometheus
+                                  with a DNS name that always resolves to the service's
+                                  private IP addresses. Only available in certain
+                                  network locations.
+                                type: boolean
+                            type: object
+                          type: array
+                        privatelinkAccess:
+                          description: Allow access to selected service components
+                            through Privatelink.
+                          items:
+                            properties:
+                              mysql:
+                                description: Enable mysql.
+                                type: boolean
+                              mysqlx:
+                                description: Enable mysqlx.
+                                type: boolean
+                              prometheus:
+                                description: Enable prometheus.
+                                type: boolean
+                            type: object
+                          type: array
+                        projectToForkFrom:
+                          description: Name of another project to fork a service from.
+                            This has effect only when a new service is being created.
+                          type: string
+                        publicAccess:
+                          description: Allow access to selected service ports from
+                            the public Internet.
+                          items:
+                            properties:
+                              mysql:
+                                description: Allow clients to connect to mysql from
+                                  the public internet for service nodes that are in
+                                  a project VPC or another type of private network.
+                                type: boolean
+                              mysqlx:
+                                description: Allow clients to connect to mysqlx from
+                                  the public internet for service nodes that are in
+                                  a project VPC or another type of private network.
+                                type: boolean
+                              prometheus:
+                                description: Allow clients to connect to prometheus
+                                  from the public internet for service nodes that
+                                  are in a project VPC or another type of private
+                                  network.
+                                type: boolean
+                            type: object
+                          type: array
+                        recoveryTargetTime:
+                          description: Recovery target time when forking a service.
+                            This has effect only when a new service is being created.
+                          type: string
+                        serviceToForkFrom:
+                          description: Name of another service to fork from. This
+                            has effect only when a new service is being created.
+                          type: string
+                        staticIps:
+                          description: Use static public IP addresses.
+                          type: boolean
+                      type: object
+                    type: array
+                  plan:
+                    description: Defines what kind of computing resources are allocated
+                      for the service. It can be changed after creation, though there
+                      are some restrictions when going to a smaller plan such as the
+                      new plan must have sufficient amount of disk space to store
+                      all current data and switching to a plan with fewer nodes might
+                      not be supported. The basic plan names are `hobbyist`, `startup-x`,
+                      `business-x` and `premium-x` where `x` is (roughly) the amount
+                      of memory on each node (also other attributes like number of
+                      CPUs and amount of disk space varies but naming is based on
+                      memory). The available options can be seem from the [Aiven pricing
+                      page](https://aiven.io/pricing).
+                    type: string
+                  project:
+                    description: Identifies the project this resource belongs to.
+                      To set up proper dependencies please refer to this variable
+                      as a reference. This property cannot be changed, doing so forces
+                      recreation of the resource.
+                    type: string
+                  projectVpcId:
+                    description: Specifies the VPC the service should run in. If the
+                      value is not set the service is not run inside a VPC. When set,
+                      the value should be given as a reference to set up dependencies
+                      correctly and the VPC must be in the same cloud and region as
+                      the service itself. Project can be freely moved to and from
+                      VPC after creation but doing so triggers migration to new servers
+                      so the operation can take significant amount of time to complete
+                      if the service has a lot of data.
+                    type: string
+                  serviceHost:
+                    description: The hostname of the service.
+                    type: string
+                  serviceIntegrations:
+                    description: Service integrations to specify when creating a service.
+                      Not applied after initial service creation
+                    items:
+                      properties:
+                        integrationType:
+                          description: Type of the service integration. The only supported
+                            value at the moment is `read_replica`
+                          type: string
+                        sourceServiceName:
+                          description: Name of the source service
+                          type: string
+                      type: object
+                    type: array
+                  servicePort:
+                    description: The port of the service
+                    type: number
+                  serviceType:
+                    description: Aiven internal service type code
+                    type: string
+                  serviceUsername:
+                    description: Username used for connecting to the service, if applicable
+                    type: string
+                  state:
+                    description: Service state. One of `POWEROFF`, `REBALANCING`,
+                      `REBUILDING` or `RUNNING`
+                    type: string
+                  staticIps:
+                    description: Static IPs that are going to be associated with this
+                      service. Please assign a value using the 'toset' function. Once
+                      a static ip resource is in the 'assigned' state it cannot be
+                      unbound from the node again
+                    items:
+                      type: string
+                    type: array
+                  tag:
+                    description: Tags are key-value pairs that allow you to categorize
+                      services.
+                    items:
+                      properties:
+                        key:
+                          description: Service tag key
+                          type: string
+                        value:
+                          description: Service tag value
+                          type: string
+                      type: object
+                    type: array
+                  terminationProtection:
+                    description: Prevents the service from being deleted. It is recommended
+                      to set this to `true` for all production services to prevent
+                      unintentional service deletion. This does not shield against
+                      deleting databases or topics but for services with backups much
+                      of the content can at least be restored from backup in case
+                      accidental deletion is done.
+                    type: boolean
+                type: object
+              conditions:
+                description: Conditions of the resource.
+                items:
+                  description: A Condition that may apply to a resource.
+                  properties:
+                    lastTransitionTime:
+                      description: LastTransitionTime is the last time this condition
+                        transitioned from one status to another.
+                      format: date-time
+                      type: string
+                    message:
+                      description: A Message containing details about this condition's
+                        last transition from one status to another, if any.
+                      type: string
+                    reason:
+                      description: A Reason for this condition's last transition from
+                        one status to another.
+                      type: string
+                    status:
+                      description: Status of this condition; is it currently True,
+                        False, or Unknown?
+                      type: string
+                    type:
+                      description: Type of this condition. At most one of each condition
+                        type may apply to a resource at any point in time.
+                      type: string
+                  required:
+                  - lastTransitionTime
+                  - reason
+                  - status
+                  - type
+                  type: object
+                type: array
+            type: object
+        required:
+        - spec
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

@@ -10,7 +10,8 @@ import (
 
 	ujconfig "github.com/upbound/upjet/pkg/config"
 
-	"github.com/joonvena/provider-aiven/config/postgres"
+	mysql "github.com/joonvena/provider-aiven/config/mysql"
+	postgres "github.com/joonvena/provider-aiven/config/postgres"
 )
 
 const (
@@ -32,12 +33,15 @@ func GetProvider() *ujconfig.Provider {
 		ujconfig.WithIncludeList(ExternalNameConfigured()),
 		ujconfig.WithFeaturesPackage("internal/features"),
 		ujconfig.WithDefaultResourceOptions(
+			GroupKindOverrides(),
+			KindOverrides(),
 			ExternalNameConfigurations(),
 		))
 
 	for _, configure := range []func(provider *ujconfig.Provider){
 		// add custom config functions
 		postgres.Configure,
+		mysql.Configure,
 	} {
 		configure(pc)
 	}
